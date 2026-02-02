@@ -34,13 +34,31 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 50px;
+      gap: 40px;
+    }
+
+    @media (max-height: 700px) {
+      .container {
+        gap: 20px;
+      }
+
+      h1 {
+        margin-bottom: 20px;
+        font-size: 1.2em;
+      }
     }
 
     .glass-container {
       position: relative;
-      width: 200px;
-      height: 350px;
+      width: 160px;
+      height: 280px;
+    }
+
+    @media (max-height: 700px) {
+      .glass-container {
+        width: 130px;
+        height: 230px;
+      }
     }
 
     .glass-svg {
@@ -220,8 +238,8 @@
 
     .ice-cube {
       position: absolute;
-      width: 70px;
-      height: 60px;
+      width: 50px;
+      height: 40px;
       background: linear-gradient(
         135deg,
         rgba(255, 255, 255, 0.95) 0%,
@@ -230,7 +248,7 @@
         rgba(200, 230, 250, 0.85) 100%
       );
       border: 1px solid rgba(180, 210, 240, 0.5);
-      border-radius: 5px;
+      border-radius: 4px;
       box-shadow:
         inset 2px 2px 4px rgba(255, 255, 255, 0.9),
         inset -1px -1px 3px rgba(150, 200, 230, 0.4),
@@ -240,23 +258,42 @@
     .ice-cube::before {
       content: '';
       position: absolute;
-      top: 6px;
-      left: 6px;
-      width: 16px;
-      height: 16px;
+      top: 4px;
+      left: 4px;
+      width: 10px;
+      height: 10px;
       background: rgba(255, 255, 255, 0.9);
-      border-radius: 4px;
+      border-radius: 3px;
     }
 
     .ice-cube::after {
       content: '';
       position: absolute;
-      bottom: 10px;
-      right: 10px;
-      width: 24px;
-      height: 12px;
+      bottom: 6px;
+      right: 6px;
+      width: 16px;
+      height: 8px;
       background: rgba(200, 225, 245, 0.5);
-      border-radius: 4px;
+      border-radius: 3px;
+    }
+
+    @media (max-height: 700px) {
+      .ice-cube {
+        width: 35px;
+        height: 28px;
+      }
+      .ice-cube::before {
+        top: 3px;
+        left: 3px;
+        width: 7px;
+        height: 7px;
+      }
+      .ice-cube::after {
+        bottom: 4px;
+        right: 4px;
+        width: 10px;
+        height: 5px;
+      }
     }
 
     .controls {
@@ -424,11 +461,12 @@
 
     let currentLiquid = 'water';
 
-    // Glass dimensions
-    const glassWidth = 200;
-    const glassHeight = 350;
-    const iceWidth = 70;
-    const iceHeight = 60;
+    // Glass dimensions - get from actual element
+    const glassContainer = document.querySelector('.glass-container');
+    const glassWidth = glassContainer.offsetWidth;
+    const glassHeight = glassContainer.offsetHeight;
+    const iceWidth = Math.min(50, glassWidth * 0.3);
+    const iceHeight = Math.min(40, glassHeight * 0.12);
 
     // Create Matter.js engine
     const engine = Engine.create();
@@ -441,11 +479,10 @@
     const wallThickness = 20;
 
     // Calculate glass wall positions (tapered glass - wider at top)
-    // Top width = 200, Bottom width = 160 (80%)
     const topLeft = 0;
     const topRight = glassWidth;
-    const bottomLeft = glassWidth * 0.1;  // 20px from left
-    const bottomRight = glassWidth * 0.9; // 180px (20px from right)
+    const bottomLeft = glassWidth * 0.1;
+    const bottomRight = glassWidth * 0.9;
 
     // Create angled left wall
     const leftWallHeight = Math.sqrt(Math.pow(glassHeight, 2) + Math.pow(bottomLeft - topLeft, 2));
@@ -522,11 +559,13 @@
       // Create DOM element
       const element = document.createElement('div');
       element.className = 'ice-cube';
+      element.style.width = `${iceWidth}px`;
+      element.style.height = `${iceHeight}px`;
       iceContainer.appendChild(element);
 
       // Random starting position at top of glass
-      const startX = 50 + Math.random() * 100;
-      const startY = -60;
+      const startX = glassWidth * 0.25 + Math.random() * (glassWidth * 0.5);
+      const startY = -iceHeight;
 
       // Create Matter.js body with rounded corners effect using chamfer
       const body = Bodies.rectangle(
