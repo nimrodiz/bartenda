@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bartenda - Glass Filler</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+    }
+
+    h1 {
+      color: #333333;
+      margin-bottom: 40px;
+      font-weight: 300;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 50px;
+    }
+
+    .glass-container {
+      position: relative;
+      width: 200px;
+      height: 350px;
+    }
+
+    .glass-svg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 20;
+      filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.1));
+    }
+
+    .glass-svg path {
+      fill: none;
+      stroke: rgba(180, 200, 220, 0.9);
+      stroke-width: 3;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+
+    .glass {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%);
+    }
+
+    .glass-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        rgba(235, 240, 248, 0.95) 0%,
+        rgba(245, 248, 255, 0.8) 20%,
+        rgba(255, 255, 255, 0.65) 50%,
+        rgba(245, 248, 255, 0.8) 80%,
+        rgba(235, 240, 248, 0.95) 100%
+      );
+    }
+
+    .glass-highlight {
+      position: absolute;
+      top: 0;
+      left: 25px;
+      width: 15px;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.8),
+        transparent
+      );
+      border-radius: 5px;
+      transform: skewX(3deg);
+      z-index: 15;
+    }
+
+    .water-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 0%;
+      transition: height 0.5s ease-out;
+      overflow: hidden;
+    }
+
+    .water {
+      position: absolute;
+      bottom: 0;
+      left: -50%;
+      width: 200%;
+      height: 100%;
+      background: linear-gradient(
+        180deg,
+        rgba(150, 200, 220, 0.4) 0%,
+        rgba(130, 180, 200, 0.5) 50%,
+        rgba(110, 160, 180, 0.55) 100%
+      );
+    }
+
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .slider-label {
+      color: #666666;
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .slider-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 300px;
+      height: 8px;
+      background: linear-gradient(90deg, #2980b9, #40a4df);
+      border-radius: 4px;
+      outline: none;
+      opacity: 0.9;
+      transition: opacity 0.2s;
+    }
+
+    input[type="range"]:hover {
+      opacity: 1;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(145deg, #ffffff, #e0e0e0);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(145deg, #ffffff, #e0e0e0);
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .percentage {
+      color: #40a4df;
+      font-size: 24px;
+      font-weight: 600;
+      min-width: 70px;
+      text-align: center;
+    }
+
+    .glow {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150%;
+      height: 50px;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(64, 164, 223, 0.3) 0%,
+        transparent 70%
+      );
+      filter: blur(20px);
+      opacity: 0;
+      transition: opacity 0.5s ease-out;
+    }
+
+    .ice-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: 0;
+      pointer-events: none;
+    }
+
+    .ice-cube {
+      position: absolute;
+      width: 70px;
+      height: 60px;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(220, 240, 255, 0.8) 30%,
+        rgba(180, 220, 245, 0.7) 60%,
+        rgba(200, 230, 250, 0.85) 100%
+      );
+      border: 1px solid rgba(180, 210, 240, 0.5);
+      border-radius: 5px;
+      box-shadow:
+        inset 2px 2px 4px rgba(255, 255, 255, 0.9),
+        inset -1px -1px 3px rgba(150, 200, 230, 0.4),
+        0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .ice-cube::before {
+      content: '';
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      width: 16px;
+      height: 16px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 4px;
+    }
+
+    .ice-cube::after {
+      content: '';
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      width: 24px;
+      height: 12px;
+      background: rgba(200, 225, 245, 0.5);
+      border-radius: 4px;
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .ice-button {
+      padding: 12px 28px;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #ffffff;
+      background: linear-gradient(135deg, #74b9ff, #0984e3);
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(9, 132, 227, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .ice-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(9, 132, 227, 0.4);
+    }
+
+    .ice-button:active {
+      transform: translateY(0);
+    }
+
+    .liquid-selector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .liquid-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .liquid-btn {
+      padding: 10px 20px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border: 2px solid #ddd;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: #fff;
+      color: #666;
+    }
+
+    .liquid-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .liquid-btn.active {
+      border-color: currentColor;
+      color: #fff;
+    }
+
+    .liquid-btn[data-liquid="water"] {
+      --liquid-color: rgba(150, 200, 220, 0.7);
+    }
+    .liquid-btn[data-liquid="water"].active {
+      background: rgba(150, 200, 220, 0.8);
+      border-color: rgba(150, 200, 220, 1);
+    }
+
+    .liquid-btn[data-liquid="vodka"] {
+      --liquid-color: rgba(220, 220, 230, 0.5);
+    }
+    .liquid-btn[data-liquid="vodka"].active {
+      background: rgba(200, 200, 210, 0.8);
+      border-color: rgba(180, 180, 190, 1);
+      color: #666;
+    }
+
+    .liquid-btn[data-liquid="lemon"] {
+      --liquid-color: rgba(255, 230, 100, 0.6);
+    }
+    .liquid-btn[data-liquid="lemon"].active {
+      background: rgba(255, 220, 80, 0.9);
+      border-color: rgba(255, 200, 50, 1);
+      color: #665500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Bartenda</h1>
+    
+    <div class="glass-container">
+      <div class="glow"></div>
+      <svg class="glass-svg" viewBox="0 0 200 350" preserveAspectRatio="none">
+        <path d="M 0 0 L 200 0 L 180 350 L 20 350 Z" />
+      </svg>
+      <div class="glass">
+        <div class="glass-bg"></div>
+        <div class="ice-container"></div>
+        <div class="water-container">
+          <div class="water"></div>
+        </div>
+        <div class="glass-highlight"></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="liquid-selector">
+        <span class="slider-label">Liquid</span>
+        <div class="liquid-buttons">
+          <button class="liquid-btn active" data-liquid="water">Water</button>
+          <button class="liquid-btn" data-liquid="vodka">Vodka</button>
+          <button class="liquid-btn" data-liquid="lemon">Lemon Juice</button>
+        </div>
+      </div>
+      <div class="slider-container">
+        <span class="slider-label">Fill Level</span>
+        <div class="slider-wrapper">
+          <input type="range" id="fillSlider" min="0" max="100" value="0">
+          <span class="percentage" id="percentageDisplay">0%</span>
+        </div>
+      </div>
+      <button class="ice-button" id="addIceBtn">Add Ice</button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <script>
+    // Matter.js module aliases
+    const { Engine, Render, World, Bodies, Body, Events, Runner } = Matter;
+
+    // DOM elements
+    const slider = document.getElementById('fillSlider');
+    const waterContainer = document.querySelector('.water-container');
+    const waterElement = document.querySelector('.water');
+    const percentageDisplay = document.getElementById('percentageDisplay');
+    const glow = document.querySelector('.glow');
+    const addIceBtn = document.getElementById('addIceBtn');
+    const iceContainer = document.querySelector('.ice-container');
+    const liquidButtons = document.querySelectorAll('.liquid-btn');
+
+    // Liquid colors
+    const liquidColors = {
+      water: {
+        gradient: 'linear-gradient(180deg, rgba(150, 200, 220, 0.4) 0%, rgba(130, 180, 200, 0.5) 50%, rgba(110, 160, 180, 0.55) 100%)',
+        glow: 'rgba(150, 200, 220, 0.3)'
+      },
+      vodka: {
+        gradient: 'linear-gradient(180deg, rgba(230, 230, 240, 0.25) 0%, rgba(220, 220, 230, 0.3) 50%, rgba(210, 210, 220, 0.35) 100%)',
+        glow: 'rgba(200, 200, 220, 0.2)'
+      },
+      lemon: {
+        gradient: 'linear-gradient(180deg, rgba(255, 240, 130, 0.5) 0%, rgba(255, 220, 80, 0.55) 50%, rgba(240, 200, 60, 0.6) 100%)',
+        glow: 'rgba(255, 220, 100, 0.4)'
+      }
+    };
+
+    let currentLiquid = 'water';
+
+    // Glass dimensions
+    const glassWidth = 200;
+    const glassHeight = 350;
+    const iceWidth = 70;
+    const iceHeight = 60;
+
+    // Create Matter.js engine
+    const engine = Engine.create();
+    const world = engine.world;
+    
+    // Set gravity
+    engine.world.gravity.y = 1;
+
+    // Glass wall thickness
+    const wallThickness = 20;
+
+    // Calculate glass wall positions (tapered glass - wider at top)
+    // Top width = 200, Bottom width = 160 (80%)
+    const topLeft = 0;
+    const topRight = glassWidth;
+    const bottomLeft = glassWidth * 0.1;  // 20px from left
+    const bottomRight = glassWidth * 0.9; // 180px (20px from right)
+
+    // Create angled left wall
+    const leftWallHeight = Math.sqrt(Math.pow(glassHeight, 2) + Math.pow(bottomLeft - topLeft, 2));
+    const leftWallAngle = Math.atan2(bottomLeft - topLeft, glassHeight);
+    const leftWall = Bodies.rectangle(
+      (topLeft + bottomLeft) / 2 - wallThickness / 2,
+      glassHeight / 2,
+      wallThickness,
+      leftWallHeight,
+      { 
+        isStatic: true,
+        angle: leftWallAngle,
+        friction: 0.1,
+        restitution: 0.2
+      }
+    );
+
+    // Create angled right wall
+    const rightWallHeight = Math.sqrt(Math.pow(glassHeight, 2) + Math.pow(topRight - bottomRight, 2));
+    const rightWallAngle = -Math.atan2(topRight - bottomRight, glassHeight);
+    const rightWall = Bodies.rectangle(
+      (topRight + bottomRight) / 2 + wallThickness / 2,
+      glassHeight / 2,
+      wallThickness,
+      rightWallHeight,
+      { 
+        isStatic: true,
+        angle: rightWallAngle,
+        friction: 0.1,
+        restitution: 0.2
+      }
+    );
+
+    // Create bottom wall
+    const bottomWall = Bodies.rectangle(
+      glassWidth / 2,
+      glassHeight + wallThickness / 2 - 5,
+      bottomRight - bottomLeft + 20,
+      wallThickness,
+      { 
+        isStatic: true,
+        friction: 0.3,
+        restitution: 0.1
+      }
+    );
+
+    // Add walls to world
+    World.add(world, [leftWall, rightWall, bottomWall]);
+
+    // Store ice cubes with their DOM elements
+    const iceCubes = [];
+
+    function setLiquid(liquidType) {
+      currentLiquid = liquidType;
+      const colors = liquidColors[liquidType];
+      waterElement.style.background = colors.gradient;
+      glow.style.background = `radial-gradient(ellipse at center, ${colors.glow} 0%, transparent 70%)`;
+      
+      // Update active button
+      liquidButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.liquid === liquidType);
+      });
+    }
+
+    function updateWaterLevel(value) {
+      const maxFillHeight = 90;
+      const height = (value / 100) * maxFillHeight;
+      waterContainer.style.height = `${height}%`;
+      percentageDisplay.textContent = `${value}%`;
+      glow.style.opacity = value / 100;
+    }
+
+    function addIceCube() {
+      // Create DOM element
+      const element = document.createElement('div');
+      element.className = 'ice-cube';
+      iceContainer.appendChild(element);
+
+      // Random starting position at top of glass
+      const startX = 50 + Math.random() * 100;
+      const startY = -60;
+
+      // Create Matter.js body with rounded corners effect using chamfer
+      const body = Bodies.rectangle(
+        startX,
+        startY,
+        iceWidth - 4,
+        iceHeight - 4,
+        {
+          chamfer: { radius: 5 },
+          friction: 0.3,
+          frictionAir: 0.01,
+          restitution: 0.2,
+          density: 0.001
+        }
+      );
+
+      World.add(world, body);
+      iceCubes.push({ body, element });
+    }
+
+    function updateIceCubePositions() {
+      for (const cube of iceCubes) {
+        const { body, element } = cube;
+        const x = body.position.x - iceWidth / 2;
+        const y = body.position.y - iceHeight / 2;
+        const angle = body.angle * (180 / Math.PI);
+
+        element.style.left = `${x}px`;
+        element.style.top = `${y}px`;
+        element.style.transform = `rotate(${angle}deg)`;
+      }
+    }
+
+    // Run the engine
+    const runner = Runner.create();
+    Runner.run(runner, engine);
+
+    // Render loop to sync DOM with physics
+    function render() {
+      updateIceCubePositions();
+      requestAnimationFrame(render);
+    }
+
+    // Event listeners
+    slider.addEventListener('input', (e) => {
+      updateWaterLevel(parseInt(e.target.value));
+    });
+
+    addIceBtn.addEventListener('click', addIceCube);
+
+    liquidButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        setLiquid(btn.dataset.liquid);
+      });
+    });
+
+    // Initialize
+    updateWaterLevel(0);
+    setLiquid('water');
+    render();
+  </script>
+</body>
+</html>
