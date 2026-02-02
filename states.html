@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bartenda - Drink Actions</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+    }
+
+    h1 {
+      color: #333333;
+      margin-bottom: 40px;
+      font-weight: 300;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+
+    @media (max-height: 700px) {
+      .container {
+        gap: 20px;
+      }
+
+      h1 {
+        margin-bottom: 20px;
+        font-size: 1.2em;
+      }
+    }
+
+    .glass-container {
+      position: relative;
+      width: 160px;
+      height: 280px;
+    }
+
+    @media (max-height: 700px) {
+      .glass-container {
+        width: 130px;
+        height: 230px;
+      }
+    }
+
+    .glass-svg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 20;
+      filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.1));
+    }
+
+    .glass-svg path {
+      fill: none;
+      stroke: rgba(180, 200, 220, 0.9);
+      stroke-width: 3;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+
+    .glass {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%);
+    }
+
+    .glass-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        rgba(235, 240, 248, 0.95) 0%,
+        rgba(245, 248, 255, 0.8) 20%,
+        rgba(255, 255, 255, 0.65) 50%,
+        rgba(245, 248, 255, 0.8) 80%,
+        rgba(235, 240, 248, 0.95) 100%
+      );
+    }
+
+    .glass-highlight {
+      position: absolute;
+      top: 0;
+      left: 25px;
+      width: 15px;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.8),
+        transparent
+      );
+      border-radius: 5px;
+      transform: skewX(3deg);
+      z-index: 15;
+    }
+
+    .water-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 0%;
+      transition: height 0.5s ease-out;
+      overflow: hidden;
+    }
+
+    .water {
+      position: absolute;
+      bottom: 0;
+      left: -50%;
+      width: 200%;
+      height: 100%;
+      background: linear-gradient(
+        180deg,
+        rgba(150, 200, 220, 0.4) 0%,
+        rgba(130, 180, 200, 0.5) 50%,
+        rgba(110, 160, 180, 0.55) 100%
+      );
+      transition: background 0.5s ease-out;
+    }
+
+    .glow {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150%;
+      height: 50px;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(64, 164, 223, 0.3) 0%,
+        transparent 70%
+      );
+      filter: blur(20px);
+      opacity: 0;
+      transition: opacity 0.5s ease-out, background 0.5s ease-out;
+    }
+
+    .ice-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: 0;
+      pointer-events: none;
+    }
+
+    .ice-cube {
+      position: absolute;
+      width: 50px;
+      height: 40px;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(220, 240, 255, 0.8) 30%,
+        rgba(180, 220, 245, 0.7) 60%,
+        rgba(200, 230, 250, 0.85) 100%
+      );
+      border: 1px solid rgba(180, 210, 240, 0.5);
+      border-radius: 4px;
+      box-shadow:
+        inset 2px 2px 4px rgba(255, 255, 255, 0.9),
+        inset -1px -1px 3px rgba(150, 200, 230, 0.4),
+        0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: opacity 0.5s ease-out;
+    }
+
+    .ice-cube::before {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 10px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 3px;
+    }
+
+    .ice-cube::after {
+      content: '';
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      width: 16px;
+      height: 8px;
+      background: rgba(200, 225, 245, 0.5);
+      border-radius: 3px;
+    }
+
+    @media (max-height: 700px) {
+      .ice-cube {
+        width: 35px;
+        height: 28px;
+      }
+      .ice-cube::before {
+        top: 3px;
+        left: 3px;
+        width: 7px;
+        height: 7px;
+      }
+      .ice-cube::after {
+        bottom: 4px;
+        right: 4px;
+        width: 10px;
+        height: 5px;
+      }
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .nav-button {
+      padding: 12px 28px;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #ffffff;
+      background: linear-gradient(135deg, #74b9ff, #0984e3);
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(9, 132, 227, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .nav-button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(9, 132, 227, 0.4);
+    }
+
+    .nav-button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .nav-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Bartenda - Actions</h1>
+    
+    <div class="glass-container">
+      <div class="glow"></div>
+      <svg class="glass-svg" viewBox="0 0 200 350" preserveAspectRatio="none">
+        <path d="M 0 0 L 200 0 L 180 350 L 20 350 Z" />
+      </svg>
+      <div class="glass">
+        <div class="glass-bg"></div>
+        <div class="ice-container"></div>
+        <div class="water-container">
+          <div class="water"></div>
+        </div>
+        <div class="glass-highlight"></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="nav-button" id="prevBtn">Previous</button>
+      <button class="nav-button" id="nextBtn">Next</button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <script>
+    // Matter.js module aliases
+    const { Engine, World, Bodies, Runner } = Matter;
+
+    // DOM elements
+    const waterContainer = document.querySelector('.water-container');
+    const waterElement = document.querySelector('.water');
+    const glow = document.querySelector('.glow');
+    const iceContainer = document.querySelector('.ice-container');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    // Global state management
+    let currentActionIndex = -1; // -1 means no actions executed
+    let actions = []; // Loaded action JSON files
+    let executedActions = []; // History of executed actions for undo
+    let currentLiquidState = {
+      level: 0,
+      color: "rgb(150, 200, 220)",
+      opacity: 0
+    };
+
+    // Glass dimensions
+    const glassContainer = document.querySelector('.glass-container');
+    const glassWidth = glassContainer.offsetWidth;
+    const glassHeight = glassContainer.offsetHeight;
+    const iceWidth = Math.min(50, glassWidth * 0.3);
+    const iceHeight = Math.min(40, glassHeight * 0.12);
+
+    // Create Matter.js engine
+    const engine = Engine.create();
+    const world = engine.world;
+    engine.world.gravity.y = 1;
+
+    // Glass wall thickness
+    const wallThickness = 20;
+    const topLeft = 0;
+    const topRight = glassWidth;
+    const bottomLeft = glassWidth * 0.1;
+    const bottomRight = glassWidth * 0.9;
+
+    // Create angled left wall
+    const leftWallHeight = Math.sqrt(Math.pow(glassHeight, 2) + Math.pow(bottomLeft - topLeft, 2));
+    const leftWallAngle = Math.atan2(bottomLeft - topLeft, glassHeight);
+    const leftWall = Bodies.rectangle(
+      (topLeft + bottomLeft) / 2 - wallThickness / 2,
+      glassHeight / 2,
+      wallThickness,
+      leftWallHeight,
+      { 
+        isStatic: true,
+        angle: leftWallAngle,
+        friction: 0.1,
+        restitution: 0.2
+      }
+    );
+
+    // Create angled right wall
+    const rightWallHeight = Math.sqrt(Math.pow(glassHeight, 2) + Math.pow(topRight - bottomRight, 2));
+    const rightWallAngle = -Math.atan2(topRight - bottomRight, glassHeight);
+    const rightWall = Bodies.rectangle(
+      (topRight + bottomRight) / 2 + wallThickness / 2,
+      glassHeight / 2,
+      wallThickness,
+      rightWallHeight,
+      { 
+        isStatic: true,
+        angle: rightWallAngle,
+        friction: 0.1,
+        restitution: 0.2
+      }
+    );
+
+    // Create bottom wall
+    const bottomWall = Bodies.rectangle(
+      glassWidth / 2,
+      glassHeight + wallThickness / 2 - 5,
+      bottomRight - bottomLeft + 20,
+      wallThickness,
+      { 
+        isStatic: true,
+        friction: 0.3,
+        restitution: 0.1
+      }
+    );
+
+    // Add walls to world
+    World.add(world, [leftWall, rightWall, bottomWall]);
+
+    // Store all ice cubes
+    const allIceCubes = [];
+
+    // Convert RGB string to gradient
+    function createGradientFromRGB(rgbString, opacity) {
+      // Parse RGB string: "rgb(150, 200, 220)" -> [150, 200, 220]
+      const match = rgbString.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+      if (!match) {
+        return 'linear-gradient(180deg, rgba(150, 200, 220, 0.4) 0%, rgba(130, 180, 200, 0.5) 50%, rgba(110, 160, 180, 0.55) 100%)';
+      }
+
+      const r = parseInt(match[1]);
+      const g = parseInt(match[2]);
+      const b = parseInt(match[3]);
+      const opacityValue = opacity / 100;
+
+      // Create darker shade for bottom (multiply by 0.7)
+      const rBottom = Math.floor(r * 0.7);
+      const gBottom = Math.floor(g * 0.7);
+      const bBottom = Math.floor(b * 0.7);
+
+      // Create medium shade for middle (multiply by 0.85)
+      const rMid = Math.floor(r * 0.85);
+      const gMid = Math.floor(g * 0.85);
+      const bMid = Math.floor(b * 0.85);
+
+      // Top uses original color
+      return `linear-gradient(180deg, 
+        rgba(${r}, ${g}, ${b}, ${opacityValue * 0.8}) 0%, 
+        rgba(${rMid}, ${gMid}, ${bMid}, ${opacityValue * 0.9}) 50%, 
+        rgba(${rBottom}, ${gBottom}, ${bBottom}, ${opacityValue}) 100%)`;
+    }
+
+    // Update liquid visualization
+    function renderLiquid() {
+      const maxFillHeight = 90;
+      const height = (currentLiquidState.level / 100) * maxFillHeight;
+      waterContainer.style.height = `${height}%`;
+      
+      const gradient = createGradientFromRGB(currentLiquidState.color, currentLiquidState.opacity);
+      waterElement.style.background = gradient;
+      
+      // Update glow
+      const rgbMatch = currentLiquidState.color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+      if (rgbMatch) {
+        const r = parseInt(rgbMatch[1]);
+        const g = parseInt(rgbMatch[2]);
+        const b = parseInt(rgbMatch[3]);
+        const glowOpacity = (currentLiquidState.opacity / 100) * 0.3;
+        glow.style.background = `radial-gradient(ellipse at center, rgba(${r}, ${g}, ${b}, ${glowOpacity}) 0%, transparent 70%)`;
+      }
+      glow.style.opacity = currentLiquidState.level / 100;
+    }
+
+    // Add a single ice cube
+    function addIceCube() {
+      // Create DOM element
+      const element = document.createElement('div');
+      element.className = 'ice-cube';
+      element.style.width = `${iceWidth}px`;
+      element.style.height = `${iceHeight}px`;
+      element.style.opacity = '1';
+      iceContainer.appendChild(element);
+
+      // Random starting position at top of glass
+      const startX = glassWidth * 0.25 + Math.random() * (glassWidth * 0.5);
+      const startY = -iceHeight;
+
+      // Create Matter.js body
+      const body = Bodies.rectangle(
+        startX,
+        startY,
+        iceWidth - 4,
+        iceHeight - 4,
+        {
+          chamfer: { radius: 5 },
+          friction: 0.3,
+          frictionAir: 0.01,
+          restitution: 0.2,
+          density: 0.001
+        }
+      );
+
+      World.add(world, body);
+      allIceCubes.push({ body, element });
+      return { body, element };
+    }
+
+    // Update ice cube positions
+    function updateIceCubePositions() {
+      for (const cube of allIceCubes) {
+        if (cube.element && cube.element.parentNode) {
+          const { body, element } = cube;
+          const x = body.position.x - iceWidth / 2;
+          const y = body.position.y - iceHeight / 2;
+          const angle = body.angle * (180 / Math.PI);
+
+          element.style.left = `${x}px`;
+          element.style.top = `${y}px`;
+          element.style.transform = `rotate(${angle}deg)`;
+        }
+      }
+    }
+
+    // Load actions from data directory
+    async function loadActions() {
+      try {
+        // Try to load action files sequentially
+        const actionFiles = [];
+        let index = 1;
+        let failed = false;
+
+        while (!failed) {
+          try {
+            const response = await fetch(`data/action${index}.json`);
+            if (response.ok) {
+              const action = await response.json();
+              actionFiles.push(action);
+              index++;
+            } else {
+              failed = true;
+            }
+          } catch (e) {
+            failed = true;
+          }
+        }
+
+        actions = actionFiles;
+        updateButtonStates();
+      } catch (error) {
+        console.error('Error loading actions:', error);
+        actions = [];
+      }
+    }
+
+    // Execute an action
+    function executeAction(action) {
+      if (action.action_type === 'add_ice') {
+        // Add 10 ice cubes
+        const iceCubes = [];
+        for (let i = 0; i < 10; i++) {
+          const cube = addIceCube();
+          iceCubes.push(cube);
+        }
+        executedActions.push({
+          type: 'add_ice',
+          iceCubes: iceCubes
+        });
+      } else if (action.action_type === 'add_liquid') {
+        // Store previous state for undo
+        const previousState = {
+          level: currentLiquidState.level,
+          color: currentLiquidState.color,
+          opacity: currentLiquidState.opacity
+        };
+
+        // Update current liquid state
+        currentLiquidState.level = action.liquid_level;
+        currentLiquidState.color = action.liquid_color;
+        currentLiquidState.opacity = action.liquid_opacity;
+
+        renderLiquid();
+
+        executedActions.push({
+          type: 'add_liquid',
+          previousState: previousState,
+          newState: {
+            level: currentLiquidState.level,
+            color: currentLiquidState.color,
+            opacity: currentLiquidState.opacity
+          }
+        });
+      }
+    }
+
+    // Undo last action
+    function undoAction() {
+      if (executedActions.length === 0) return;
+
+      const lastAction = executedActions.pop();
+
+      if (lastAction.type === 'add_ice') {
+        // Fade out and remove ice cubes
+        lastAction.iceCubes.forEach(cube => {
+          if (cube.element && cube.element.parentNode) {
+            cube.element.style.opacity = '0';
+            setTimeout(() => {
+              if (cube.element && cube.element.parentNode) {
+                World.remove(world, cube.body);
+                cube.element.remove();
+                const index = allIceCubes.indexOf(cube);
+                if (index > -1) {
+                  allIceCubes.splice(index, 1);
+                }
+              }
+            }, 500);
+          }
+        });
+      } else if (lastAction.type === 'add_liquid') {
+        // Restore previous liquid state
+        if (lastAction.previousState) {
+          currentLiquidState.level = lastAction.previousState.level;
+          currentLiquidState.color = lastAction.previousState.color;
+          currentLiquidState.opacity = lastAction.previousState.opacity;
+        } else {
+          // No previous state, reset to empty
+          currentLiquidState.level = 0;
+          currentLiquidState.color = "rgb(150, 200, 220)";
+          currentLiquidState.opacity = 0;
+        }
+        renderLiquid();
+      }
+    }
+
+    // Navigate to next action
+    function nextAction() {
+      if (currentActionIndex < actions.length - 1) {
+        currentActionIndex++;
+        const action = actions[currentActionIndex];
+        executeAction(action);
+        updateButtonStates();
+      }
+    }
+
+    // Navigate to previous action (undo)
+    function previousAction() {
+      if (currentActionIndex >= 0) {
+        undoAction();
+        currentActionIndex--;
+        updateButtonStates();
+      }
+    }
+
+    // Update button states
+    function updateButtonStates() {
+      prevBtn.disabled = currentActionIndex < 0;
+      nextBtn.disabled = currentActionIndex >= actions.length - 1;
+    }
+
+    // Run the engine
+    const runner = Runner.create();
+    Runner.run(runner, engine);
+
+    // Render loop to sync DOM with physics
+    function render() {
+      updateIceCubePositions();
+      requestAnimationFrame(render);
+    }
+
+    // Event listeners
+    prevBtn.addEventListener('click', previousAction);
+    nextBtn.addEventListener('click', nextAction);
+
+    // Initialize
+    renderLiquid();
+    loadActions().then(() => {
+      updateButtonStates();
+    });
+    render();
+  </script>
+</body>
+</html>

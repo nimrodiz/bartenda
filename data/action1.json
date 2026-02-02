@@ -1,0 +1,6 @@
+{
+  "action_type": "add_liquid",
+  "liquid_level": 30,
+  "liquid_color": "rgb(150, 200, 220)",
+  "liquid_opacity": 50
+}
