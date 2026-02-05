@@ -77,8 +77,8 @@ function liquidGradientColors(color: string, opacity: number): [string, string, 
 }
 
 export default function StatesScreen() {
-  const [currentActionIndex, setCurrentActionIndex] = useState(-1);
   const [executedActions, setExecutedActions] = useState<ExecutedAction[]>([]);
+  const currentActionIndex = executedActions.length - 1;
   const [liquidState, setLiquidState] = useState<LiquidState>({
     level: 0,
     color: 'rgb(150, 200, 220)',
@@ -289,16 +289,14 @@ export default function StatesScreen() {
   }
 
   function handleNext() {
-    if (currentActionIndex >= actions.length - 1) return;
-    const nextIndex = currentActionIndex + 1;
-    setCurrentActionIndex(nextIndex);
+    const nextIndex = executedActions.length;
+    if (nextIndex >= actions.length) return;
     executeAction(actions[nextIndex]);
   }
 
   function handlePrevious() {
-    if (currentActionIndex < 0) return;
+    if (executedActions.length === 0) return;
     undoAction();
-    setCurrentActionIndex((i) => i - 1);
   }
 
   const liquidColors = liquidGradientColors(liquidState.color, liquidState.opacity);
