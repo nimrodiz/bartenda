@@ -1,0 +1,57 @@
+---
+description: Rules for git commit workflow and code review process
+alwaysApply: true
+---
+
+# Commit Workflow Rules
+
+## ⚠️ CRITICAL: Commit Approval Required
+
+**ALWAYS ask for explicit user approval before committing ANY changes.**
+- **NEVER run `git commit` or `git push` without first asking and receiving approval**
+- This rule applies to ALL commits, regardless of the task or context
+- Present the commit message and summary of changes, then ask: "Ready to commit and push? (yes/no)"
+- Only proceed with `git commit` and `git push` after receiving explicit "yes" approval
+
+## Workflow for Simple Tasks
+
+When given a simple task or coding request:
+
+1. **Review and Implement**
+   - Analyze the current codebase to understand context
+   - Make necessary code changes
+   - Ensure code follows best practices and project conventions
+   - Check for potential issues, bugs, or edge cases
+
+2. **Prepare for Commit**
+   - Review all changes made (show diff summary)
+   - Create a clear, descriptive commit message following conventional commit format
+   - Verify changes are complete and correct
+   - Check for any linting errors or issues
+
+3. **Wait for Approval**
+   - **NEVER commit or push without explicit user approval**
+   - Present the commit message and summary of changes
+   - Ask: "Ready to commit and push? (yes/no)"
+   - Only proceed with `git commit` and `git push` after receiving explicit approval
+
+## Commit Message Format
+
+Use conventional commit format:
+- `feat:` for new features
+- `fix:` for bug fixes
+- `docs:` for documentation changes
+- `refactor:` for code refactoring
+- `test:` for adding tests
+- `chore:` for maintenance tasks
+
+Example: `feat: add user authentication endpoint`
+
+## Git Workflow
+
+- **ALWAYS ask for user approval before committing** - this is mandatory for every commit
+- Always check `git status` before committing
+- Stage only relevant files (avoid committing temporary files, logs, etc.)
+- Use meaningful commit messages that explain what and why
+- Push to the current branch unless otherwise specified
+- Never skip the approval step, even for small or trivial changes
